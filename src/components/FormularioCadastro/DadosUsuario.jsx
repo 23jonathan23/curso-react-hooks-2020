@@ -4,12 +4,33 @@ import { TextField, Button } from "@material-ui/core"
 function DadosUsuario({aoEnviar}) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [erros, setErros] = useState({senha:{valido:true, texto:""}})
+
+
+  function validarCampos(event) {
+    const { name, value } = event.target
+    const ehValido = validacoes[name](value)
+    const novoEstado = { ...erros }
+    novoEstado[name] = ehValido
+    setErros({...novoEstado})
+  }
+
+  function possoEnviar() {
+    for(let campo in erros) {
+      if(!erros[campo].valido){
+        return false
+      }
+    }
+    return true
+  }
 
   return (
     <form 
       onSubmit={(event) => { 
-        event.preventDefault();
-        aoEnviar({email, senha});
+        event.preventDefault()
+        if(possoEnviar()) {
+          aoEnviar({email, senha})
+        }
       }}
     >
       <TextField
@@ -19,6 +40,7 @@ function DadosUsuario({aoEnviar}) {
         }}
         id="email"
         label="Email"
+        name="email"
         type="email"
         variant="outlined"
         margin="normal"
@@ -30,8 +52,12 @@ function DadosUsuario({aoEnviar}) {
         onChange={(event) => {
           setSenha(event.target.value);
         }}
+        onBlur={validarCampos}
+        error={!erros.senha.valido}
+        helperText={erros.senha.texto}
         id="senha"
         label="Senha"
+        name="senha"
         type="password"
         variant="outlined"
         margin="normal"
